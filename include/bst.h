@@ -2,57 +2,80 @@
 #ifndef INCLUDE_BST_H_
 #define INCLUDE_BST_H_
 
-#include <iostream>
+#include <algorithm>
 #include <string>
 
-template <typename T>
+template<typename T>
 struct Node {
-    T data;
-    Node* left;
-    Node* right;
+    T key;
     int count;
+    Node *left, *right;
 
-    Node(const T& value) : data(value), left(nullptr), right(nullptr), count(1) {}
+    explicit Node(T value) : key(value), count(1), left(nullptr), right(nullptr) {}
 };
 
-template <typename T>
+template<typename T>
 class BST {
 private:
-    Node<T>* root;
+    Node<T> *root;
 
-    Node<T>* insert(Node<T>* node, const T& value) {
-        if (!node) {
-            return new Node<T>(value);
-        }
+    int calculateHeight(Node<T> *node) {
+        if (node == nullptr)
+            return 0;
+        int rightHeight = calculateHeight(node->right);
+        int leftHeight = calculateHeight(node->left);
+        return std::max(rightHeight, leftHeight) + 1;
+    }
 
-        if (value < node->data) {
-            node->left = insert(node->left, value);
-        } else if (value > node->data) {
-            node->right = insert(node->right, value);
+    Node<T> *insertNode(Node<T> *node, T value) {
+        if (node == nullptr) {
+            node = new Node<T>(value);
+        } else if (node->key > value) {
+            node->left = insertNode(node->left, value);
+        } else if (node->key < value) {
+            node->right = insertNode(node->right, value);
         } else {
             node->count++;
         }
-
         return node;
     }
 
-    void inorder(Node<T>* node, std::ostream& os) const {
-        if (node) {
-            inorder(node->left, os);
-            os << node->data << " (" << node->count << ")" << std::endl;
-            inorder(node->right, os);
-        }
+    int findValue(Node<T> *node, T value) {
+        if (node->key == value)
+            return node->count;
+        else if (node->key > value)
+            return findValue(node->left, value);
+        else if (node->key < value)
+            return findValue(node->right, value);
+        else
+            return 0;
+    }
+
+    void deleteTreeNodes(Node<T> *node) {
+        if (node == nullptr)
+            return;
+        deleteTreeNodes(node->right);
+        deleteTreeNodes(node->left);
+        delete node;
     }
 
 public:
     BST() : root(nullptr) {}
 
-    void insert(const T& value) {
-        root = insert(root, value);
+    void insert(T value) {
+        root = insertNode(root, value);
     }
 
-    void inorder(std::ostream& os = std::cout) const {
-        inorder(root, os);
+    int getHeight() {
+        return calculateHeight(root) - 1;
+    }
+
+    int searchValue(T value) {
+        return findValue(root, value);
+    }
+
+    ~BST() {
+        deleteTreeNodes(root);
     }
 };
 
