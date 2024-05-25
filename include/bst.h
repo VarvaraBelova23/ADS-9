@@ -5,17 +5,18 @@
 #include <algorithm>
 #include <string>
 #include <memory>
+#include <utility>
 
 template <typename T>
 class BST {
-public:
+ public:
     struct Node {
         T value;
         int count;
         std::unique_ptr<Node> left;
         std::unique_ptr<Node> right;
 
-        Node(const T& val)
+        explicit Node(const T& val)
             : value(val), count(1), left(nullptr), right(nullptr) {}
     };
 
@@ -34,7 +35,7 @@ public:
         return depthImpl(root.get()) - 1;
     }
 
-private:
+ private:
     std::unique_ptr<Node> root;
 
     std::unique_ptr<Node> insertImpl(std::unique_ptr<Node> node, const T& value) {
